@@ -16,4 +16,4 @@ A smart assistant that provides personalized career roadmaps using AI.
 5. Open `index.html` in your browser.
 
 
-Built by *** for *** 2025.
+Built by TECH TITANS- Anuska Maity, Sattwik Roy, Shamik Lahiri, and Monalee Mukherjee.
