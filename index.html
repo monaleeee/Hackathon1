@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StreamFinder AI | Career Counseling</title>
 
-    <!-- ✅ Use absolute path -->
+    <!-- ✅ Ensures correct routing on Vercel -->
+    <base href="/">
+
+    <!-- ✅ Absolute path -->
     <link rel="stylesheet" href="/style.css">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
@@ -51,7 +54,8 @@
         </main>
     </div>
 
-    <!-- ✅ Absolute path + defer so DOM loads first -->
+    <!-- ✅ Absolute path + defer -->
     <script src="/script.js" defer></script>
 </body>
 </html>
+
