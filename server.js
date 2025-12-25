@@ -5,49 +5,64 @@ const axios = require('axios');
 const path = require('path');
 
 dotenv.config();
-const app = express();
-app.use(cors(), express.json());
 
-// FIXED: This line ensures Vercel can find your index.html and other files
-app.use(express.static(path.join(__dirname)));
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// ✅ Vercel-safe static file serving
+app.use(express.static(process.cwd()));
 
 app.post('/get-advice', async (req, res) => {
     try {
         const { prompt } = req.body;
         const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
 
-        console.log("Terminal: Attempting call with Gemini 2.5 Flash-Lite...");
+        if (!apiKey) {
+            return res.status(500).json({ error: "API key missing" });
+        }
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
+        const url =
+            `https://generativelanguage.googleapis.com/v1beta/models/` +
+            `gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
 
         const response = await axios.post(url, {
             contents: [{ parts: [{ text: prompt }]}],
-            generationConfig: { 
-                temperature: 0.9, 
-                maxOutputTokens: 2048 
+            generationConfig: {
+                temperature: 0.9,
+                maxOutputTokens: 2048
             }
         });
 
-        const aiText = response.data.candidates[0].content.parts[0].text;
-        console.log("Terminal: SUCCESS! AI is working.");
+        const aiText =
+            response.data.candidates?.[0]?.content?.parts?.[0]?.text
+            || "No response from AI";
+
         res.json({ advice: aiText });
 
     } catch (error) {
-        console.error("--- ERROR ---");
-        console.error(error.response ? JSON.stringify(error.response.data, null, 2) : error.message);
-        res.status(500).json({ error: "AI is currently overloaded. Please try again in 60s." });
+        console.error("Gemini API Error:", 
+            error.response ? error.response.data : error.message
+        );
+
+        res.status(500).json({
+            error: "AI is currently overloaded. Please try again in 60s."
+        });
     }
 });
 
-// IMPORTANT: Vercel needs to handle the routing to your homepage
+// ✅ Root route handled by Express
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(process.cwd(), 'index.html'));
 });
 
-// Vercel does not use app.listen, so we only run it if we are local
+// ✅ Local development only
 if (process.env.NODE_ENV !== 'production') {
-    app.listen(3000, () => console.log('Server LIVE on 3000 | Using Gemini 2.5'));
+    app.listen(3000, () => {
+        console.log('Server LIVE on http://localhost:3000');
+    });
 }
 
-// THIS IS THE MOST IMPORTANT LINE FOR VERCEL
+// ✅ Required export for Vercel
 module.exports = app;
+
