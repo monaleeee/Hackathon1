@@ -10,8 +10,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Vercel-safe static file serving
-app.use(express.static(process.cwd()));
+// ✅ Serve ONLY public folder (important)
+const publicPath = path.join(__dirname, 'public');
+app.use(express.static(publicPath));
 
 app.post('/get-advice', async (req, res) => {
     try {
@@ -35,13 +36,14 @@ app.post('/get-advice', async (req, res) => {
         });
 
         const aiText =
-            response.data.candidates?.[0]?.content?.parts?.[0]?.text
+            response.data?.candidates?.[0]?.content?.parts?.[0]?.text
             || "No response from AI";
 
         res.json({ advice: aiText });
 
     } catch (error) {
-        console.error("Gemini API Error:", 
+        console.error(
+            "Gemini API Error:",
             error.response ? error.response.data : error.message
         );
 
@@ -51,18 +53,5 @@ app.post('/get-advice', async (req, res) => {
     }
 });
 
-// ✅ Root route handled by Express
-app.get('/', (req, res) => {
-    res.sendFile(path.join(process.cwd(), 'index.html'));
-});
-
-// ✅ Local development only
-if (process.env.NODE_ENV !== 'production') {
-    app.listen(3000, () => {
-        console.log('Server LIVE on http://localhost:3000');
-    });
-}
-
-// ✅ Required export for Vercel
-module.exports = app;
+// ✅ Always serve fr
 
