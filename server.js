@@ -10,6 +10,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Basic Security Headers
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    next();
+});
+
 // ✅ Serve ONLY public folder (important)
 const publicPath = path.join(__dirname, 'public');
 app.use(express.static(publicPath));
@@ -28,7 +36,7 @@ app.post('/get-advice', async (req, res) => {
             `gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
 
         const response = await axios.post(url, {
-            contents: [{ parts: [{ text: prompt }]}],
+            contents: [{ parts: [{ text: prompt }] }],
             generationConfig: {
                 temperature: 0.9,
                 maxOutputTokens: 2048
@@ -53,5 +61,13 @@ app.post('/get-advice', async (req, res) => {
     }
 });
 
-// ✅ Always serve fr
+// ✅ Always serve index.html for any unknown route (SPA support)
+app.get(/.*/, (req, res) => {
+    res.sendFile(path.join(publicPath, 'index.html'));
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
 

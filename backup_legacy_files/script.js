@@ -13,11 +13,11 @@ function appendMessage(text, sender) {
 
 async function fetchCareerAdvice(userText) {
     try {
-        // Fetching from relative path to work in both dev and prod
-        const response = await fetch('/get-advice', {
+        // Fetching from localhost:3000 and /get-advice route
+        const response = await fetch('http://localhost:3000/get-advice', { 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: userText }),
+            body: JSON.stringify({ prompt: userText }), 
         });
 
         if (!response.ok) throw new Error('Server issues');
@@ -26,7 +26,7 @@ async function fetchCareerAdvice(userText) {
         return data.advice; // Backend se 'advice' key aa rahi hai
     } catch (error) {
         console.error("Error:", error);
-        return "Currently experiencing high traffic. Please try again in a moment.";
+        return "Connection failed. Please check if the CMD terminal is still running.";
     }
 }
 
@@ -43,7 +43,7 @@ async function handleSend() {
     chatWindow.appendChild(loadingDiv);
 
     const advice = await fetchCareerAdvice(text);
-
+    
     loadingDiv.innerText = advice;
     chatWindow.scrollTop = chatWindow.scrollHeight;
 }
@@ -51,4 +51,5 @@ async function handleSend() {
 sendBtn.addEventListener('click', handleSend);
 userInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') handleSend();
+
 });
